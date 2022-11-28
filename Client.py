@@ -35,7 +35,6 @@ while Input != "leave":
         print(str.encode(str(json)))
         clientSock.sendto(str.encode(str(json)), (UDP_IP_ADDRESS, UDP_PORT_NO))
         print("all")
-        break;
     elif Input[:4] == "msg ":
         json = {'command': 'msg', 'handle': 'handle',  'message': 'message'}
         print("message")
