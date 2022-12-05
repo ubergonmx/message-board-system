@@ -51,9 +51,14 @@ while True:
         response = json.dumps(response)
         serverSock.sendto(bytes(response, "utf-8"), (addr))     
     elif (json_obj['command'] == "msg"):
-        if (json_obj['handle'] not in registrants.keys()):
-            response = {"response": "Error: Handle or alias not found."}
+        if (addr not in currentUsers.keys()):
+            response = {"response": "Error: You need to be registered to send a message."}
+            response = json.dumps(response)
             serverSock.sendto(bytes(response, "utf-8"), (addr))
+        elif (json_obj['handle'] not in registrants.keys()):
+            response = {"response": "Error: Handle or alias not found."}
+            response = json.dumps(response)
+            serverSock.sendto(bytes(response, "utf-8"), (addr))     
         elif (json_obj['handle'] not in currentUsers.values()):
             msg = "(To " + json_obj['handle'] + ") " + json_obj['message']
             response = {"response": msg}
@@ -69,12 +74,17 @@ while True:
             response = json.dumps(response)
             serverSock.sendto(bytes(response, "utf-8"), (registrants.get(json_obj['handle'])))
     elif (json_obj['command'] == "all"):
-        msg = str(currentUsers.get(addr)) + ": " + json_obj['message']
-        allUsers = list(currentUsers.keys())
-        for userAddr in allUsers:
-            response = {"response": msg}
+        if (addr not in currentUsers.keys()):
+            response = {"response": "Error: You need to be registered to send a message."}
             response = json.dumps(response)
-            serverSock.sendto(bytes(response, "utf-8"), (userAddr))
+            serverSock.sendto(bytes(response, "utf-8"), (addr))
+        else:
+            msg = str(currentUsers.get(addr)) + ": " + json_obj['message']
+            allUsers = list(currentUsers.keys())
+            for userAddr in allUsers:
+                response = {"response": msg}
+                response = json.dumps(response)
+                serverSock.sendto(bytes(response, "utf-8"), (userAddr))
     elif (json_obj['command'] == "error"):
         response = {"response": "Error: Command not found."}
         response = json.dumps(response)
@@ -82,4 +92,3 @@ while True:
     print(registrants)
     print(currentUsers)
     print(addresses)
-    
