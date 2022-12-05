@@ -1,12 +1,12 @@
 def syntaxcommands():
     print("Input syntax:")
-    print("Description Input                        | Syntax Sample                 | Input Script\n")
-    print("Connect to the server application        | /join <server_ip_add> <port>  | /join 192.168.1.1 12345")
-    print("Disconnect to the server application     | /leave                        | /leave")
-    print("Register a unique handle or alias        | /register <handle>            | /register Student1")
-    print("Send message to all                      | /all <message>                | /all Hello World!")
-    print("Send direct message to a single handle   | /msg <handle> <message>       | /msg Student1 Hello!")
-    print("Help to output all Input Syntax commands | /?                            | /?\n")
+    print("Description Input                        | Syntax Sample                | Input Script\n")
+    print("Connect to the server application        | join <server_ip_add> <port>  | join 192.168.1.1 12345")
+    print("Disconnect to the server application     | leave                        | leave")
+    print("Register a unique handle or alias        | register <handle>            | register Student1")
+    print("Send message to all                      | all <message>                | all Hello World!")
+    print("Send direct message to a single handle   | msg <handle> <message>       | msg Student1 Hello!")
+    print("Help to output all Input Syntax commands | ?                            | ?\n")
 
 def outputbox():
     while True:
@@ -50,14 +50,11 @@ while allowed == 0:
         else:
             print("Error: Command parameters do not match or is not allowed.")
     elif Input == "leave":
-        json_obj = {'command': 'leave'}
-        json_obj = json.dumps(json_obj)
-        clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
-        break;  
+        print("Error: Disconnection failed. Please connect to the server first.")
     elif Input == "?":
         syntaxcommands()
     else:
-        print ('Command not found.')
+        print ('Command not found or not allowed until user joins the server.')
         
 stop_threads = False    
 if allowed == 1:
