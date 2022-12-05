@@ -12,7 +12,6 @@ def outputbox():
     while True:
         data, server = clientSock.recvfrom(1024)  
         data = data.decode('utf-8')
-        #data = data.replace("'", '"')
         data = json.loads(data)
         print("\n------------FROM SERVER-------------")
         print (data['response'])
@@ -40,13 +39,16 @@ while allowed == 0:
     
     if Input[:5] == "join ":        
         string = Input.split()   
-        json_obj = {'command': 'join'}
-        json_obj = json.dumps(json_obj)
-        if (string[1] == "127.0.0.1" and string[2] == "6789"):
-            allowed = 1 
-            clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 6789))
+        if (len(string) == 3):
+            json_obj = {'command': 'join'}
+            json_obj = json.dumps(json_obj)
+            if (string[1] == "127.0.0.1" and string[2] == "6789"):
+                allowed = 1 
+                clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 6789))
+            else:
+                print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
         else:
-            print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+            print("Error: Command parameters do not match or is not allowed.")
     elif Input == "leave":
         json_obj = {'command': 'leave'}
         json_obj = json.dumps(json_obj)
@@ -65,10 +67,13 @@ while allowed == 1:
     Input = input()
     json_obj = {}
     if Input[:9] == "register ":
-        string = Input.split()  
-        json_obj = {'command': 'register', 'handle': str(string[1])}
-        json_obj = json.dumps(json_obj)
-        clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+        string = Input.split(" ", 1)  
+        if (len(string) == 2):
+            json_obj = {'command': 'register', 'handle': str(string[1])}
+            json_obj = json.dumps(json_obj)
+            clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+        else:
+            print("Error: Command parameters do not match or is not allowed.")
     elif Input == "leave":
         json_obj = {'command': 'leave'}
         json_obj = json.dumps(json_obj)
@@ -76,15 +81,20 @@ while allowed == 1:
         allowed = 0; 
     elif Input[:4] == "msg ":
         string = Input.split(' ', 2) 
-        json_obj = {'command': 'msg', 'handle': string[1],  'message': string[2]}  
-        json_obj = json.dumps(json_obj)
-        clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+        if (len(string) == 3):
+            json_obj = {'command': 'msg', 'handle': string[1],  'message': string[2]}  
+            json_obj = json.dumps(json_obj)
+            clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+        else:
+            print("Error: Command parameters do not match or is not allowed.")
     elif Input[:4] == "all ":
         string = Input.split(' ', 1) 
-        json_obj = {"command": "all", "message": string[1]}
-        json_obj = json.dumps(json_obj)
-        clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
-        print("all")
+        if (len(string) == 2):
+            json_obj = {"command": "all", "message": string[1]}
+            json_obj = json.dumps(json_obj)
+            clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+        else:
+            print("Error: Command parameters do not match or is not allowed.")
     elif Input == "?":
         syntaxcommands()
     else:
