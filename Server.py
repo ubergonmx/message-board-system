@@ -16,27 +16,29 @@ serverSock.bind((UDP_IP_ADDRESS, UDP_PORT_NO))
 
 registrants = {}
 currentUsers = {}
+addresses = []
 
 while True:
     response = {}
     data, addr = serverSock.recvfrom(1024)    
     data = data.decode('utf-8')
-    #data = data.replace("'", '"')
-    print ("Message: ", data)
     json_obj = json.loads(data)
-    print (json_obj['command'])
+    print (json_obj)
     
     if (json_obj['command'] == "join"):
         response = {"response": "Connection to the Message Board Server is successful!"}
         response = json.dumps(response)
         serverSock.sendto(bytes(response, "utf-8"), (addr))
+        addresses.append(addr)
     elif (json_obj['command'] == "leave"):
         response = {"response": "Connection closed. Thank you!"}
         response = json.dumps(response)
         serverSock.sendto(bytes(response, "utf-8"), (addr))
-        if (addr in currentUsers.keys()):
+        if (addr in currentUsers.keys()):    
             currentUsers.pop(addr)
-        if (len(currentUsers)==0):
+        if (addr in addresses):
+            addresses.remove(addr)
+        if (len(addresses)==0):
             break;
     elif (json_obj['command'] == "register"):
         if (json_obj['handle'] not in registrants.keys()):
@@ -47,9 +49,7 @@ while True:
         else:
             response = {"response": "Error: Registration failed. Handle or alias already exists."}
         response = json.dumps(response)
-        serverSock.sendto(bytes(response, "utf-8"), (addr))
-        print(registrants)
-        print(currentUsers)
+        serverSock.sendto(bytes(response, "utf-8"), (addr))     
     elif (json_obj['command'] == "msg"):
         if (json_obj['handle'] not in registrants.keys()):
             response = {"response": "Error: Handle or alias not found."}
@@ -69,13 +69,9 @@ while True:
             response = json.dumps(response)
             serverSock.sendto(bytes(response, "utf-8"), (registrants.get(json_obj['handle'])))
     elif (json_obj['command'] == "all"):
-        msg = "(To all) " + json_obj['message']
-        response = {"response": msg}
-        response = json.dumps(response)
-        serverSock.sendto(bytes(response, "utf-8"), (registrants.get(currentUsers.get(addr))))
-        allUsers = list(registrants.values())
+        msg = str(currentUsers.get(addr)) + ": " + json_obj['message']
+        allUsers = list(currentUsers.keys())
         for userAddr in allUsers:
-            msg = "(From " + str(currentUsers.get(addr)) + ") " + json_obj['message']
             response = {"response": msg}
             response = json.dumps(response)
             serverSock.sendto(bytes(response, "utf-8"), (userAddr))
@@ -83,4 +79,7 @@ while True:
         response = {"response": "Error: Command not found."}
         response = json.dumps(response)
         serverSock.sendto(bytes(response, "utf-8"), (addr))
-   
+    print(registrants)
+    print(currentUsers)
+    print(addresses)
+    
