@@ -1,99 +1,43 @@
 import customtkinter
+from tkinter import messagebox
 import socket
 import sys
 import json
+import threading
 
 
-# def outputbox():
-#     while True:
-#         data, server = clientSock.recvfrom(1024)  
-#         data = data.decode('utf-8')
-#         data = json.loads(data)
-#         print("\n------------FROM SERVER-------------")
-#         print (data['response'])
-#         print("------------FROM SERVER-------------\n")
-#         if stop_threads:
-#             break
+def outputbox():
+    while True:
+        try:
+            data, server = clientSock.recvfrom(1024)  
+            data = data.decode('utf-8')
+            data = json.loads(data)
+            app.insert_text(data['response'], "server")
+            print("\n------------FROM SERVER-------------")
+            print (data['response'])
+            print("------------FROM SERVER-------------\n")
+            if stop_threads:
+                break
+        except:
+            app.insert_text("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.", "error")
+            print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
 
 
-# Input = ""
-# allowed = 0
-# outputbox = threading.Thread(target=outputbox)
-# while allowed == 0:
-#     Input = input()
-#     json_obj = {}
-    
-#     if Input[:5] == "join ":        
-#         string = Input.split()   
-#         if (len(string) == 3):
-#             json_obj = {'command': 'join'}
-#             json_obj = json.dumps(json_obj)
-#             if (string[1] == "127.0.0.1" and string[2] == "6789"):
-#                 allowed = 1 
-#                 clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 6789))
-#             else:
-#                 print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
-#         else:
-#             print("Error: Command parameters do not match or is not allowed.")
-#     elif Input == "leave":
-#         print("Error: Disconnection failed. Please connect to the server first.")
-#     elif Input == "?":
-#         syntaxcommands()
-#     else:
-#         print ('Command not found or not allowed until user joins the server.')
-        
-# stop_threads = False    
-# if allowed == 1:
-#     outputbox.start()  
-        
-# while allowed == 1:
-#     Input = input()
-#     json_obj = {}
-#     if Input[:9] == "register ":
-#         string = Input.split(" ", 1)  
-#         if (len(string) == 2):
-#             json_obj = {'command': 'register', 'handle': str(string[1])}
-#             json_obj = json.dumps(json_obj)
-#             clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
-#         else:
-#             print("Error: Command parameters do not match or is not allowed.")
-#     elif Input == "leave":
-#         json_obj = {'command': 'leave'}
-#         json_obj = json.dumps(json_obj)
-#         clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
-#         allowed = 0; 
-#     elif Input[:4] == "msg ":
-#         string = Input.split(' ', 2) 
-#         if (len(string) == 3):
-#             json_obj = {'command': 'msg', 'handle': string[1],  'message': string[2]}  
-#             json_obj = json.dumps(json_obj)
-#             clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
-#         else:
-#             print("Error: Command parameters do not match or is not allowed.")
-#     elif Input[:4] == "all ":
-#         string = Input.split(' ', 1) 
-#         if (len(string) == 2):
-#             json_obj = {"command": "all", "message": string[1]}
-#             json_obj = json.dumps(json_obj)
-#             clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
-#         else:
-#             print("Error: Command parameters do not match or is not allowed.")
-#     elif Input == "?":
-#         syntaxcommands()
-#     else:
-#         json_obj = {'command': 'error', 'message': '<error_message>'}
-#         json_obj = json.dumps(json_obj)
-#         clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
-        
-# stop_threads = True   
-# outputbox.join()
+Input = ""
+allowed = 0
+stop_threads = False
+outputbox = threading.Thread(target=outputbox)
+threads = []
+
+UDP_IP_ADDRESS = "127.0.0.1"
+UDP_PORT_NO = 6789
+clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+json_obj = {}
 
 class App(customtkinter.CTk):
 
-    UDP_IP_ADDRESS = "127.0.0.1"
-    UDP_PORT_NO = 6789
-    clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    defaultTitle = "Message Board System - Client GUI"
 
     syntaxHelp = [
         "Description Input\t\t\t\t\t| Syntax Sample\t\t\t| Input Script",
@@ -118,7 +62,7 @@ class App(customtkinter.CTk):
         super().__init__()
 
         self.geometry("700x300")
-        self.title("Message Board System - Client GUI")
+        self.title(self.defaultTitle)
         self.minsize(300, 200)
 
         # create 2x2 grid system
@@ -127,6 +71,11 @@ class App(customtkinter.CTk):
 
         self.textbox = customtkinter.CTkTextbox(master=self)
         self.textbox.grid(row=0, column=0, columnspan=2, padx=20, pady=(20, 0), sticky="nsew")
+        self.textbox.tag_config("server", background="#17A2B8")
+        self.textbox.tag_config("help1", background="#FFC107", foreground="#343A40")
+        self.textbox.tag_config("help2", foreground="#FFC107")
+        self.textbox.tag_config("error", background="#DC3545")
+        # self.textbox.tag_config("private", background="#343A40")
         self.textbox.configure(state="disabled")
 
         self.combobox = customtkinter.CTkComboBox(master=self, values=self.syntaxPresets)
@@ -134,39 +83,117 @@ class App(customtkinter.CTk):
         self.button = customtkinter.CTkButton(master=self, command=self.send_callback, text="Send command")
         self.button.grid(row=1, column=1, padx=20, pady=20, sticky="ew")
 
-    def insert_text(self, text):
+    def change_title(self, title):
+        self.title(title)
+
+    def insert_text(self, text, config=""):
         self.textbox.configure(state="normal")
-        self.textbox.insert("insert", text + "\n")
+        if config == "server":
+            self.textbox.insert("insert", text + "\n", "server")
+        elif config == "help1":
+            self.textbox.insert("insert", text + "\n", "help1")
+        elif config == "help2":
+            self.textbox.insert("insert", text + "\n", "help2")
+        elif config == "error":
+            self.textbox.insert("insert", text + "\n", "error")
+        else:
+            self.textbox.insert("insert", text + "\n")
+        self.textbox.see("end")
         self.textbox.configure(state="disabled")
 
     def send_callback(self):
-        self.insert_text(self.combobox.get())
-        self.checkInput(self.combobox.get())
+        if self.combobox.get() != "" and not str.isspace(self.combobox.get()):
+            self.insert_text(self.combobox.get())
+            self.check_input(self.combobox.get())
+            self.combobox.set("")
 
-    def checkInput(self, Input):
-        json_obj = {}
-    
-        if Input[:5] == "join ":        
-            string = Input.split()   
-            if (len(string) == 3):
-                json_obj = {'command': 'join'}
-                json_obj = json.dumps(json_obj)
-                if (string[1] == "127.0.0.1" and string[2] == "6789"):
-                    allowed = 1 
-                    self.clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 6789))
-                    self.insert_text("Connected to server.")
+    def check_input(self, Input):
+        global allowed, outputbox, clientSock
+        if allowed == 0:
+            if Input[:5] == "join ":        
+                string = Input.split()   
+                if (len(string) == 3):
+                    json_obj = {'command': 'join'}
+                    json_obj = json.dumps(json_obj)
+                    # try:
+                    if (string[1] == "127.0.0.1" and string[2] == "6789"):
+                        allowed = 1
+                        clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 6789))
+                        outputbox.start()
+                    else:
+                        self.insert_text("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.", "error")
+                    # except:
+                    #     self.insert_text("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.", "error")
                 else:
-                    self.insert_text("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+                    self.insert_text("Error: Command parameters do not match or is not allowed.", "error")
+            elif Input == "leave":
+                self.insert_text("Error: Disconnection failed. Please connect to the server first.", "error")
+            elif Input == "?":
+                i = 0
+                for text in self.syntaxHelp:
+                    if (i == 0):
+                        self.insert_text(text, "help1")
+                    else:
+                        self.insert_text(text, "help2")
+                    i += 1
             else:
-                self.insert_text("Error: Command parameters do not match or is not allowed.")
-        elif Input == "leave":
-            self.insert_text("Error: Disconnection failed. Please connect to the server first.")
-        elif Input == "?":
-            for i in self.syntaxHelp:
-                self.insert_text(i)
-        else:
-            self.insert_text('Command not found or not allowed until user joins the server.')
+                self.insert_text('Command not found or not allowed until user joins the server.', "error")
+        elif allowed == 1:
+            if Input[:9] == "register ":
+                string = Input.split(' ', 1) 
+                if (len(string) == 2):
+                    json_obj = {'command': 'register', 'handle': string[1]}
+                    json_obj = json.dumps(json_obj)
+                    clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                    self.change_title(self.defaultTitle + "(" + string[1] + ")")
+                else:
+                    self.insert_text("Error: Command parameters do not match or is not allowed.", "error")
+            elif Input == "leave":
+                json_obj = {'command': 'leave'}
+                json_obj = json.dumps(json_obj)
+                clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                self.change_title(self.defaultTitle)
+                allowed = 0
+            elif Input[:4] == "msg ":
+                string = Input.split(' ', 2) 
+                if (len(string) == 3):
+                    json_obj = {'command': 'msg', 'handle': string[1],  'message': string[2]}  
+                    json_obj = json.dumps(json_obj)
+                    clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                else:
+                    self.insert_text("Error: Command parameters do not match or is not allowed.", "error")
+            elif Input[:4] == "all ":
+                string = Input.split(' ', 1) 
+                if (len(string) == 2):
+                    json_obj = {"command": "all", "message": string[1]}
+                    json_obj = json.dumps(json_obj)
+                    clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                else:
+                    self.insert_text("Error: Command parameters do not match or is not allowed.", "error")
+            elif Input == "?":
+                i = 0
+                for text in self.syntaxHelp:
+                    if (i == 0):
+                        self.insert_text(text, "help1")
+                    else:
+                        self.insert_text(text, "help2")
+                    i += 1
+            else:
+                json_obj = {'command': 'error', 'message': '<error_message>'}
+                json_obj = json.dumps(json_obj)
+                clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
 
+def on_closing():
+    global allowed, clientSock
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        if allowed == 1:
+            json_obj = {'command': 'leave'}
+            json_obj = json.dumps(json_obj)
+            clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+        clientSock.close()
+        app.destroy()
+
+app = App()
 if __name__ == "__main__":
-    app = App()
+    app.protocol("WM_DELETE_WINDOW", on_closing)
     app.mainloop()
