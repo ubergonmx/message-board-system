@@ -42,10 +42,13 @@ while allowed == 0:
         if (len(string) == 3):
             json_obj = {'command': 'join'}
             json_obj = json.dumps(json_obj)
-            if (string[1] == "127.0.0.1" and string[2] == "6789"):
-                allowed = 1 
-                clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 6789))
-            else:
+            try:
+                if (string[1] == "127.0.0.1" and string[2] == "6789"):
+                    allowed = 1 
+                    clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 6789))
+                else:
+                    print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
+            except:
                 print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
         else:
             print("Error: Command parameters do not match or is not allowed.")
