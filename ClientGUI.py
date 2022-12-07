@@ -28,8 +28,7 @@ Input = ""
 allowed = 0
 stop_threads = False
 outputbox = threading.Thread(target=outputbox)
-threads = []
-
+outputbox.daemon = True
 UDP_IP_ADDRESS = "127.0.0.1"
 UDP_PORT_NO = 6789
 clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -37,7 +36,8 @@ json_obj = {}
 
 class App(customtkinter.CTk):
 
-    defaultTitle = "Message Board System - Client GUI"
+    defaultTitle = "Message Board System - Client GUI "
+    leave = False
 
     syntaxHelp = [
         "Description Input\t\t\t\t\t| Syntax Sample\t\t\t| Input Script",
@@ -105,7 +105,12 @@ class App(customtkinter.CTk):
         if self.combobox.get() != "" and not str.isspace(self.combobox.get()):
             self.insert_text(self.combobox.get())
             self.check_input(self.combobox.get())
-            self.combobox.set("")
+            if not self.leave:
+                self.combobox.set("")
+            else:
+                print("Closing Client GUI...")
+                self.destroy()
+            
 
     def check_input(self, Input):
         global allowed, outputbox, clientSock
@@ -153,7 +158,7 @@ class App(customtkinter.CTk):
                 json_obj = json.dumps(json_obj)
                 clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
                 self.change_title(self.defaultTitle)
-                allowed = 0
+                self.leave = True
             elif Input[:4] == "msg ":
                 string = Input.split(' ', 2) 
                 if (len(string) == 3):
@@ -197,3 +202,8 @@ app = App()
 if __name__ == "__main__":
     app.protocol("WM_DELETE_WINDOW", on_closing)
     app.mainloop()
+    print("Stopping thread...")
+    stop_threads = True
+    outputbox.join()
+    print("Thread stopped.")
+    raise SystemExit
