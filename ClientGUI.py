@@ -162,6 +162,8 @@ class App(customtkinter.CTk):
                 json_obj = json.dumps(json_obj)
                 clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
                 self.change_title(self.defaultTitle)
+                # show message box ok
+                messagebox.showinfo("Message Board System", "Connection closed. Thank you!")
                 self.leave = True
             elif Input[:4] == "msg ":
                 string = Input.split(' ', 2) 
