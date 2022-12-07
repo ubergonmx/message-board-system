@@ -7,21 +7,27 @@ import threading
 
 
 def outputbox():
+    global allowed, registered
     while True:
         try:
             data, server = clientSock.recvfrom(1024)  
             data = data.decode('utf-8')
             data = json.loads(data)
-            if "Error" in data['response']:
-                app.insert_text(data['response'], "error")
-            else:
-                app.insert_text(data['response'], "server")
-            print("\n------------FROM SERVER-------------")
-            print (data['response'])
-            print("------------FROM SERVER-------------\n")
+            if "registered" in data and data['registered'] == True:
+                registered = True
+
+            if "response" in data:
+                if "Error" in data['response']:
+                    app.insert_text(data['response'], "error")
+                else:
+                    app.insert_text(data['response'], "server")
+                print("\n------------FROM SERVER-------------")
+                print (data['response'])
+                print("------------FROM SERVER-------------\n")
             if stop_threads:
                 break
         except:
+            allowed = 0
             app.insert_text("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.", "error")
             print("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.")
 
@@ -159,7 +165,6 @@ class App(customtkinter.CTk):
                     json_obj = {'command': 'register', 'handle': string[1]}
                     json_obj = json.dumps(json_obj)
                     clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
-                    registered = True
                     self.change_title(self.defaultTitle + "(" + string[1] + ")")
                 else:
                     self.insert_text("Error: Command parameters do not match or is not allowed.", "error")

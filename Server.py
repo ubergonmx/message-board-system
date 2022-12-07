@@ -44,12 +44,12 @@ while True:
             break;
     elif (json_obj['command'] == "register"):
         if (json_obj['handle'] not in registrants.keys()):
-            msg = "Welcome, " + json_obj['handle']
-            response = {"response": msg}
+            msg = "Welcome, " + json_obj['handle']            
+            response = {"response": msg, "registered": True}
             registrants.update({json_obj['handle']: addr})
             currentUsers.update({addr: json_obj['handle']})
         else:
-            response = {"response": "Error: Registration failed. Handle or alias already exists."}
+            response = {"response": "Error: Registration failed. Handle or alias already exists.", "registered": False}
         response = json.dumps(response)
         serverSock.sendto(bytes(response, "utf-8"), (addr))     
     elif (json_obj['command'] == "msg"):
