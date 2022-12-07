@@ -38,8 +38,8 @@ while True:
             currentUsers.pop(addr)
         if (addr in addresses):
             addresses.remove(addr)
-        if (len(addresses)==0):
-            break;
+        # if (len(addresses)==0):
+        #     break;
     elif (json_obj['command'] == "register"):
         if (json_obj['handle'] not in registrants.keys()):
             msg = "Welcome, " + json_obj['handle']
@@ -89,6 +89,8 @@ while True:
         response = {"response": "Error: Command not found."}
         response = json.dumps(response)
         serverSock.sendto(bytes(response, "utf-8"), (addr))
+    # stop server
+
     print(registrants)
     print(currentUsers)
     print(addresses)
