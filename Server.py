@@ -6,7 +6,7 @@ import json
 ## Here we define the UDP IP address as well as the port number that we have
 ## already defined in the client python script.
 UDP_IP_ADDRESS = "127.0.0.1"
-UDP_PORT_NO = 6789
+UDP_PORT_NO = 12345
 ## declare our serverSocket upon which
 ## we will be listening for UDP messages
 serverSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -34,12 +34,14 @@ while True:
         response = {"response": "Connection closed. Thank you!"}
         response = json.dumps(response)
         serverSock.sendto(bytes(response, "utf-8"), (addr))
+        if (addr in registrants.values()):
+            registrants.pop(currentUsers.get(addr))
         if (addr in currentUsers.keys()):    
             currentUsers.pop(addr)
         if (addr in addresses):
             addresses.remove(addr)
-        # if (len(addresses)==0):
-        #     break;
+        if (len(addresses)==0):
+            break;
     elif (json_obj['command'] == "register"):
         if (json_obj['handle'] not in registrants.keys()):
             msg = "Welcome, " + json_obj['handle']

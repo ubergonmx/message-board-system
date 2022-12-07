@@ -29,11 +29,13 @@ def outputbox():
 
 Input = ""
 allowed = 0
+registered = False
 stop_threads = False
 outputbox = threading.Thread(target=outputbox)
 outputbox.daemon = True
+
 UDP_IP_ADDRESS = "127.0.0.1"
-UDP_PORT_NO = 6789
+UDP_PORT_NO = 12345
 clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 json_obj = {}
 
@@ -119,7 +121,7 @@ class App(customtkinter.CTk):
             
 
     def check_input(self, Input):
-        global allowed, outputbox, clientSock
+        global allowed, outputbox, clientSock, registered
         if allowed == 0:
             if Input[:5] == "join ":        
                 string = Input.split()   
@@ -127,10 +129,11 @@ class App(customtkinter.CTk):
                     json_obj = {'command': 'join'}
                     json_obj = json.dumps(json_obj)
                     # try:
-                    if (string[1] == "127.0.0.1" and string[2] == "6789"):
+                    if (string[1] == "127.0.0.1" and string[2] == "12345"):
                         allowed = 1
-                        clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 6789))
-                        outputbox.start()
+                        clientSock.sendto(bytes(json_obj, "utf-8"), ("127.0.0.1", 12345))
+                        if not outputbox.is_alive():
+                            outputbox.start() 
                     else:
                         self.insert_text("Error: Connection to the Message Board Server has failed! Please check IP Address and Port Number.", "error")
                     # except:
@@ -152,10 +155,11 @@ class App(customtkinter.CTk):
         elif allowed == 1:
             if Input[:9] == "register ":
                 string = Input.split(' ', 2)
-                if (len(string) == 2):
+                if (len(string) == 2 and not registered):
                     json_obj = {'command': 'register', 'handle': string[1]}
                     json_obj = json.dumps(json_obj)
                     clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                    registered = True
                     self.change_title(self.defaultTitle + "(" + string[1] + ")")
                 else:
                     self.insert_text("Error: Command parameters do not match or is not allowed.", "error")
@@ -164,6 +168,7 @@ class App(customtkinter.CTk):
                 json_obj = json.dumps(json_obj)
                 clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
                 self.change_title(self.defaultTitle)
+                registered = False
                 allowed = 0
                 # messagebox.showinfo("Message Board System", "Connection closed. Thank you!")
                 # self.leave = True
