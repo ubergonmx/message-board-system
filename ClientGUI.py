@@ -91,6 +91,7 @@ class App(customtkinter.CTk):
 
     def insert_text(self, text, config=""):
         self.textbox.configure(state="normal")
+        self.textbox.see("end")
         if config == "server":
             self.textbox.insert("insert", text + "\n", "server")
         elif config == "help1":
@@ -101,6 +102,7 @@ class App(customtkinter.CTk):
             self.textbox.insert("insert", text + "\n", "error")
         else:
             self.textbox.insert("insert", text + "\n")
+        
         self.textbox.see("end")
         self.textbox.configure(state="disabled")
 
@@ -108,12 +110,12 @@ class App(customtkinter.CTk):
         if self.combobox.get() != "" and not str.isspace(self.combobox.get()):
             self.insert_text(self.combobox.get())
             self.check_input(self.combobox.get())
-            # self.combobox.set("")
-            if not self.leave:
-                self.combobox.set("")
-            else:
-                print("Closing Client GUI...")
-                self.destroy()
+            self.combobox.set("")
+            # if not self.leave:
+            #     self.combobox.set("")
+            # else:
+            #     print("Closing Client GUI...")
+            #     self.destroy()
             
 
     def check_input(self, Input):
@@ -149,7 +151,7 @@ class App(customtkinter.CTk):
                 self.insert_text('Command not found or not allowed until user joins the server.', "error")
         elif allowed == 1:
             if Input[:9] == "register ":
-                string = Input.split(' ', 1) 
+                string = Input.split(' ', 2)
                 if (len(string) == 2):
                     json_obj = {'command': 'register', 'handle': string[1]}
                     json_obj = json.dumps(json_obj)
@@ -162,9 +164,9 @@ class App(customtkinter.CTk):
                 json_obj = json.dumps(json_obj)
                 clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
                 self.change_title(self.defaultTitle)
-                # show message box ok
-                messagebox.showinfo("Message Board System", "Connection closed. Thank you!")
-                self.leave = True
+                allowed = 0
+                # messagebox.showinfo("Message Board System", "Connection closed. Thank you!")
+                # self.leave = True
             elif Input[:4] == "msg ":
                 string = Input.split(' ', 2) 
                 if (len(string) == 3):
