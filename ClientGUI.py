@@ -12,7 +12,10 @@ def outputbox():
             data, server = clientSock.recvfrom(1024)  
             data = data.decode('utf-8')
             data = json.loads(data)
-            app.insert_text(data['response'], "server")
+            if "Error" in data['response']:
+                app.insert_text(data['response'], "error")
+            else:
+                app.insert_text(data['response'], "server")
             print("\n------------FROM SERVER-------------")
             print (data['response'])
             print("------------FROM SERVER-------------\n")
@@ -37,7 +40,7 @@ json_obj = {}
 class App(customtkinter.CTk):
 
     defaultTitle = "Message Board System - Client GUI "
-    leave = False
+    # leave = False
 
     syntaxHelp = [
         "Description Input\t\t\t\t\t| Syntax Sample\t\t\t| Input Script",
@@ -105,11 +108,12 @@ class App(customtkinter.CTk):
         if self.combobox.get() != "" and not str.isspace(self.combobox.get()):
             self.insert_text(self.combobox.get())
             self.check_input(self.combobox.get())
-            if not self.leave:
-                self.combobox.set("")
-            else:
-                print("Closing Client GUI...")
-                self.destroy()
+            self.combobox.set("")
+            # if not self.leave:
+            #     self.combobox.set("")
+            # else:
+            #     print("Closing Client GUI...")
+            #     self.destroy()
             
 
     def check_input(self, Input):
@@ -158,7 +162,7 @@ class App(customtkinter.CTk):
                 json_obj = json.dumps(json_obj)
                 clientSock.sendto(bytes(json_obj, "utf-8"), (UDP_IP_ADDRESS, UDP_PORT_NO))
                 self.change_title(self.defaultTitle)
-                self.leave = True
+                # self.leave = True
             elif Input[:4] == "msg ":
                 string = Input.split(' ', 2) 
                 if (len(string) == 3):
