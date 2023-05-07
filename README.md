@@ -26,4 +26,4 @@ The correct IP address is `127.0.0.1` and the correct port is `12345`. **Please 
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the BSD-3 License - see the LICENSE file for details.
