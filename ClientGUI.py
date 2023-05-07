@@ -1,3 +1,9 @@
+# Copyright (c) 2022, ubergonmx
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree. 
+
 import customtkinter
 from tkinter import messagebox
 import socket

@@ -1,3 +1,9 @@
+# Copyright (c) 2022, ubergonmx
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 ## Again we import the necessary socket python module
 import socket
 import sys
