@@ -1,6 +1,6 @@
 # Message Board System
 ![preview](./preview.png)
-This is a simple client-server messaging system made for a Network class project. The program allows multiple clients to connect to a server and send messages to each other. The system uses UDP communication, and multi-threading and socket programming were implemented for the server to handle multiple clients simultaneously.
+This is a simple client-server messaging system made for a Network class project. The program allows multiple clients to connect to a server and send messages to each other. The system uses UDP communication and socket programming were implemented for the server to handle multiple clients simultaneously.
 
 ## Usage
 
@@ -17,7 +17,7 @@ For this program, we imported `customtkinter`, `socket`, `sys`, `json`, and `thr
     - `msg <handle> <message>`
     - `?`
 
-The correct IP address is `127.0.0.1` and the correct port is `12345`. **Please see the [Guide.pdf](./Guide.pdf)  file for a guide**
+The correct IP address is `127.0.0.1` and the correct port is `12345`. **Please see the [Guide.pdf](./Guide.pdf)  file for a detailed guide.**
 
 ## Members:
 - Martinez, Kyle
